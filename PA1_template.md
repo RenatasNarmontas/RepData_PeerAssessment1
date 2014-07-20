@@ -1,23 +1,48 @@
----
-output:
-  html_document:
-    keep_md: yes
----
 # Reproducible Research: Peer Assessment 1
 
 By Renatas Narmontas  
-Generated: `r as.character(Sys.time())`  
-Version: `r R.version$version.string`
+Generated: 2014-07-20 13:30:45  
+Version: R version 3.1.1 (2014-07-10)
 
 ## Global options
 
 Loading required packages and setting global options.
 
-```{r setoptions,echo=TRUE}
+
+```r
 require(knitr)
+```
+
+```
+## Loading required package: knitr
+```
+
+```r
 require(ggplot2)
+```
+
+```
+## Loading required package: ggplot2
+```
+
+```r
 require(gridExtra)
+```
+
+```
+## Loading required package: gridExtra
+## Loading required package: grid
+```
+
+```r
 require(reshape2)
+```
+
+```
+## Loading required package: reshape2
+```
+
+```r
 # echo always TRUE
 opts_chunk$set(echo = TRUE, fig.path = 'figures/' )
 # Avoiding scientific notation
@@ -35,7 +60,8 @@ Show any code that is needed to
 
 Unzipping file "activity.zip".
 
-```{r file.check}
+
+```r
 if (!file.exists("activity.csv")) {
     if (file.exists("activity.zip")) {
         unzip("activity.zip")
@@ -45,18 +71,53 @@ if (!file.exists("activity.csv")) {
 
 Loading file "activity.csv".
 
-```{r data.load}
+
+```r
 data <- read.csv("activity.csv")
 head(data)
 ```
 
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
 Excluding NA data.
 
-```{r}
+
+```r
 data.without.NA <- data[!is.na(data$steps), ]
 head(data.without.NA)
+```
+
+```
+##     steps       date interval
+## 289     0 2012-10-02        0
+## 290     0 2012-10-02        5
+## 291     0 2012-10-02       10
+## 292     0 2012-10-02       15
+## 293     0 2012-10-02       20
+## 294     0 2012-10-02       25
+```
+
+```r
 agg.data <- aggregate(steps ~ date, data.without.NA, sum)
 head(agg.data)
+```
+
+```
+##         date steps
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
 ```
 
 ## What is mean total number of steps taken per day?
@@ -70,20 +131,35 @@ For this part of the assignment, you can ignore the missing values in the datase
 
 Plotting histogram of the total number of steps taken each day. binwidth = every 1000 steps.
 
-```{r ggplot.hist.total.number.1}
+
+```r
 ggplot(agg.data, aes(x=steps)) + geom_histogram(binwidth=1000) + scale_y_discrete(breaks = seq(1,10)) + theme_bw()
 ```
 
+![plot of chunk ggplot.hist.total.number.1](figures/ggplot.hist.total.number.1.png) 
+
 Calculating total mean and median of steps.
 
-```{r}
+
+```r
 tot.step.mean <- mean(agg.data$steps)
 tot.step.mean
+```
+
+```
+## [1] 10766
+```
+
+```r
 tot.step.median <- median(agg.data$steps)
 tot.step.median
 ```
 
-The mean of total number of steps taken per day is **`r tot.step.mean`**. The median of total number steps taken per day is **`r tot.step.median`**.
+```
+## [1] 10765
+```
+
+The mean of total number of steps taken per day is **10766.1887**. The median of total number steps taken per day is **10765**.
 
 ## What is the average daily activity pattern?
 
@@ -95,12 +171,26 @@ The mean of total number of steps taken per day is **`r tot.step.mean`**. The me
 
 Calculating and plotting average daily activity pattern.
 
-```{r ggplot.avg.daily.pattern}
+
+```r
 duom<-tapply(data.without.NA$steps, data.without.NA$interval, mean)
 duom2<-melt(duom)
 time.5.min <- c(0:287)
 duom2 <- data.frame(duom2, time.5.min)
 head(duom2)
+```
+
+```
+##   Var1   value time.5.min
+## 1    0 1.71698          0
+## 2    5 0.33962          1
+## 3   10 0.13208          2
+## 4   15 0.15094          3
+## 5   20 0.07547          4
+## 6   25 2.09434          5
+```
+
+```r
 ggplot(duom2, aes(x=time.5.min, y=value)) + 
     geom_line(lwd=.5) + 
     ggtitle("Average daily activity pattern") + 
@@ -110,11 +200,20 @@ ggplot(duom2, aes(x=time.5.min, y=value)) +
         breaks = seq(0,287,36), 
         labels=c("00:00","03:00","06:00","09:00","12:00","15:00","18:00","21:00")) + 
     theme_bw()
+```
+
+![plot of chunk ggplot.avg.daily.pattern](figures/ggplot.avg.daily.pattern.png) 
+
+```r
 max.interval <- duom2[duom2$value == max(duom2$value),]$Var1
 max.interval
 ```
 
-Maximum average number of steps is interval between **`r sub("([[:digit:]]{2,2})$", ":\\1", max.interval)`** and **`r sub("([[:digit:]]{2,2})$", ":\\1", max.interval+5)`**
+```
+## [1] 835
+```
+
+Maximum average number of steps is interval between **8:35** and **8:40**
 
 ## Imputing missing values
 
@@ -126,16 +225,22 @@ Maximum average number of steps is interval between **`r sub("([[:digit:]]{2,2})
 
 **Solution**:  
 
-```{r}
+
+```r
 row.count <- nrow(data) - nrow(data.without.NA)
 row.count
 ```
 
-Total number of missing values in the dataset is **`r row.count`**.
+```
+## [1] 2304
+```
+
+Total number of missing values in the dataset is **2304**.
 
 Filling in all of the missing values with the mean for that 5-minute interval.
 
-```{r}
+
+```r
 data.recovered <- data
 for (i in 1:nrow(data.recovered)) {
     if (is.na(data.recovered$steps[i])) {
@@ -146,22 +251,50 @@ for (i in 1:nrow(data.recovered)) {
 
 Aggregating and plotting histogram of the total number of steps taken each day. binwidth = every 1000 steps.
 
-```{r ggplot.hist.total.number.2}
+
+```r
 agg.data <- aggregate(steps ~ date, data.recovered, sum)
 head(agg.data)
+```
+
+```
+##         date steps
+## 1 2012-10-01 10766
+## 2 2012-10-02   126
+## 3 2012-10-03 11352
+## 4 2012-10-04 12116
+## 5 2012-10-05 13294
+## 6 2012-10-06 15420
+```
+
+```r
 ggplot(agg.data, aes(x=steps)) + geom_histogram(binwidth=1000) + scale_y_discrete(breaks = seq(1,20)) + theme_bw()
 ```
 
+![plot of chunk ggplot.hist.total.number.2](figures/ggplot.hist.total.number.2.png) 
+
 Calculating total mean and median of steps.
 
-```{r}
+
+```r
 tot.step.mean <- mean(agg.data$steps)
 tot.step.mean
+```
+
+```
+## [1] 10766
+```
+
+```r
 tot.step.median <- median(agg.data$steps)
 tot.step.median
 ```
 
-The mean of total number of steps taken per day is **`r tot.step.mean`**. The median of total number steps taken per day is **`r tot.step.median`**.
+```
+## [1] 10766
+```
+
+The mean of total number of steps taken per day is **10766.1887**. The median of total number steps taken per day is **10766.1887**.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -174,7 +307,8 @@ For this part the weekdays() function may be of some help here. Use the dataset 
 
 Creating a new factor variable.
 
-```{r}
+
+```r
 for (i in 1:nrow(data.recovered)) {
     day.level <- weekdays(as.Date(data.recovered$date[i]))
     if ( day.level %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")) {
@@ -186,16 +320,28 @@ for (i in 1:nrow(data.recovered)) {
 head(data.recovered)
 ```
 
+```
+##     steps       date interval day.level
+## 1 1.71698 2012-10-01        0   Weekday
+## 2 0.33962 2012-10-01        5   Weekday
+## 3 0.13208 2012-10-01       10   Weekday
+## 4 0.15094 2012-10-01       15   Weekday
+## 5 0.07547 2012-10-01       20   Weekday
+## 6 2.09434 2012-10-01       25   Weekday
+```
+
 Subsetting weekdays and weekends.
 
-```{r}
+
+```r
 weekdays <- data.recovered[data.recovered$day.level == "Weekday", ]
 weekends <- data.recovered[data.recovered$day.level == "Weekend", ]
 ```
 
 Calculating and plotting average daily activity pattern.
 
-```{r ggplot.avg.pattern.day.level}
+
+```r
 duom.weekdays <- tapply(weekdays$steps, weekdays$interval, mean)
 duom2.weekdays <- melt(duom.weekdays)
 duom2.weekdays <- data.frame(duom2.weekdays, time.5.min)
@@ -224,9 +370,12 @@ ggplot.2 <- ggplot(duom2.weekends, aes(x=time.5.min, y=value)) +
 grid.arrange(ggplot.1, ggplot.2, ncol=1, nrow=2)
 ```
 
+![plot of chunk ggplot.avg.pattern.day.level](figures/ggplot.avg.pattern.day.level.png) 
+
 **Extra task**. Merging both graphs into one for better visualization.
 
-```{r ggplot.extra.task}
+
+```r
 final.data <- merge(duom2.weekdays, duom2.weekends, by="time.5.min")
 ggplot(final.data, aes(x=time.5.min)) +
     geom_line(aes(y=value.x, colour="weekday")) +
@@ -242,11 +391,14 @@ ggplot(final.data, aes(x=time.5.min)) +
     theme(legend.justification=c(1,1), legend.position=c(1,1))
 ```
 
+![plot of chunk ggplot.extra.task](figures/ggplot.extra.task.png) 
+
 ## Cleaning up
 
 Removing data to free memory.
 
-```{r cleaning.up}
+
+```r
 rm(data, data.without.NA, data.recovered, agg.data, duom, duom2)
 rm(weekdays, weekends, duom.weekdays, duom2.weekdays, duom.weekends, duom2.weekends, ggplot.1, ggplot.2)
 rm(final.data)
