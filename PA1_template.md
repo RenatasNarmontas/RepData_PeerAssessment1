@@ -1,7 +1,7 @@
 # Reproducible Research: Peer Assessment 1
 
 By Renatas Narmontas  
-Generated: 2014-07-20 13:30:45  
+Generated: 2014-07-20 19:21:20  
 Version: R version 3.1.1 (2014-07-10)
 
 ## Global options
@@ -133,7 +133,11 @@ Plotting histogram of the total number of steps taken each day. binwidth = every
 
 
 ```r
-ggplot(agg.data, aes(x=steps)) + geom_histogram(binwidth=1000) + scale_y_discrete(breaks = seq(1,10)) + theme_bw()
+ggplot(agg.data, aes(x=steps)) + 
+    geom_histogram(binwidth=1000) + 
+    scale_y_discrete(breaks = seq(1,10)) + 
+    ggtitle("The total number of steps taken each day") +
+    theme_bw()
 ```
 
 ![plot of chunk ggplot.hist.total.number.1](figures/ggplot.hist.total.number.1.png) 
@@ -193,7 +197,7 @@ head(duom2)
 ```r
 ggplot(duom2, aes(x=time.5.min, y=value)) + 
     geom_line(lwd=.5) + 
-    ggtitle("Average daily activity pattern") + 
+    ggtitle("Average number of steps taken\n(averaged across all days)\nversus the 5-minute intervals") + 
     ylab("Steps (#)") + 
     xlab(NULL) + 
     scale_x_discrete(
@@ -213,7 +217,7 @@ max.interval
 ## [1] 835
 ```
 
-Maximum average number of steps is interval between **8:35** and **8:40**
+The 5-minute interval that, on average, contains the maximum number of steps is the interval between **8:35** and **8:40**
 
 ## Imputing missing values
 
@@ -237,7 +241,9 @@ row.count
 
 Total number of missing values in the dataset is **2304**.
 
-Filling in all of the missing values with the mean for that 5-minute interval.
+The strategy for imputting missing data:
+
+* Change missing values (NAs) to the mean values for that 5-minute interval.  
 
 
 ```r
@@ -268,7 +274,11 @@ head(agg.data)
 ```
 
 ```r
-ggplot(agg.data, aes(x=steps)) + geom_histogram(binwidth=1000) + scale_y_discrete(breaks = seq(1,20)) + theme_bw()
+ggplot(agg.data, aes(x=steps)) + 
+    geom_histogram(binwidth=1000) + 
+    scale_y_discrete(breaks = seq(1,20)) + 
+    ggtitle("The total number of steps taken each day\nafter missing values were imputed") +
+    theme_bw()
 ```
 
 ![plot of chunk ggplot.hist.total.number.2](figures/ggplot.hist.total.number.2.png) 
